@@ -246,9 +246,26 @@ app.get("/getCustomerRentals/:customerId", async (req, res) => {
       res.status(500).send("Server Error");
     }
   });
+
+  app.post("/addCustomer", async (req, res) => {
+    const { firstName, lastName, email } = req.body;
+
+    try {
+        const addCustomerQuery = `
+            INSERT INTO customer (store_id, first_name, last_name, email, address_id, active, create_date, last_update)
+            VALUES (1, ?, ?, ?, 1, 1, NOW(), NOW());
+        `;
+
+        await db.promise().query(addCustomerQuery, [firstName, lastName, email]);
+        res.json({ success: true, message: 'Customer added successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
   
 
 
 
 app.listen(3001, () => console.log("app is running"));
-
