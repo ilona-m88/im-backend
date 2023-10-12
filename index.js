@@ -230,7 +230,7 @@ app.get("/getCustomerRentals/:customerId", async (req, res) => {
     try {
       // Fetch movies rented by the customer using the customer ID
       const rentalsQuery = `
-      SELECT film.title, rental.rental_date, customer.customer_id, customer.email
+      SELECT film.title, rental.rental_date, rental.return_date, customer.customer_id, customer.email
       FROM rental
       INNER JOIN inventory ON rental.inventory_id = inventory.inventory_id
       INNER JOIN film ON inventory.film_id = film.film_id
@@ -303,6 +303,24 @@ app.delete("/deleteCustomer/:customerId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+app.put("/returnMovie", async (req, res) => {
+    const { rentalId } = req.body;
+
+    try {
+        const returnMovieQuery = `
+            UPDATE rental
+            SET return_date = NOW()
+            WHERE rental_id = ?;
+        `;
+
+        await db.promise().query(returnMovieQuery, [rentalId]);
+        res.json({ success: true, message: 'Movie returned successfully!' });
+    } catch (err) {
+        console.error("Error returning movie:", err);
+        res.status(500).send("Server Error");
+    }
+});
+
 
 
   
