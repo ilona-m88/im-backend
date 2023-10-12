@@ -322,6 +322,21 @@ app.put("/returnMovie", async (req, res) => {
 });
 
 
+app.get("/getCustomersWhoRentedMovies", async (req, res) => {
+    try {
+        const query = `
+            SELECT DISTINCT customer.customer_id, customer.first_name, customer.last_name
+            FROM customer
+            JOIN rental ON customer.customer_id = rental.customer_id
+        `;
+
+        const results = await db.promise().query(query);
+        res.json(results[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
 
   
 
