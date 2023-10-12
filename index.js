@@ -257,12 +257,53 @@ app.get("/getCustomerRentals/:customerId", async (req, res) => {
         `;
 
         await db.promise().query(addCustomerQuery, [firstName, lastName, email]);
+        const insertResults = await db.promise().query(addCustomerQuery, [firstName, lastName, email]);
+        const newCustomerId = insertResults[0].insertId;
+
+            const fetchNewCustomerQuery = 'SELECT * FROM customer WHERE customer_id = ?';
+        const [newCustomerData] = await db.promise().query(fetchNewCustomerQuery, [newCustomerId]);
+
         res.json({ success: true, message: 'Customer added successfully!' });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
     }
 });
+app.put("/updateCustomer/:customerId", async (req, res) => {
+    const customerId = req.params.customerId;
+    const { firstName, lastName, email } = req.body;
+
+    if (!firstName || !lastName) {
+        return res.status(400).send('First name and last name cannot be null.');
+    }
+    try {
+        const updateCustomerQuery = `
+            UPDATE customer
+            SET first_name = ?, last_name = ?, email = ?
+            WHERE customer_id = ?;
+        `;
+
+        await db.promise().query(updateCustomerQuery, [firstName, lastName, email, customerId]);
+        res.json({ success: true, message: 'Customer details updated successfully!' });
+    } catch (err) {
+        console.error("Error updating customer:", err);
+        res.status(500).send("Server Error");
+    }
+});
+app.delete("/deleteCustomer/:customerId", async (req, res) => {
+    const customerId = req.params.customerId;
+
+    try {
+        const deleteQuery = `DELETE FROM customer WHERE customer_id = ?`;
+        await db.promise().query(deleteQuery, [customerId]);
+        
+        res.json({ success: true, message: 'Customer deleted successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
 
   
 
